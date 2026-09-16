@@ -1,0 +1,10 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+export const Route = createFileRoute("/login")({
+  head: () => ({ meta: [{ title: "Sign In | BuildTrack" }, { name: "description", content: "Sign in to your BuildTrack construction workspace." }, { property: "og:title", content: "Sign In | BuildTrack" }, { property: "og:description", content: "Access your BuildTrack workspace." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  component: LoginPage,
+});
+
+function LoginPage() { return <main className="blueprint-grid flex min-h-screen items-center justify-center p-5"><div className="w-full max-w-md border border-border bg-card p-8 shadow-xl"><Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-4"/> Back to BuildTrack</Link><p className="text-xs font-bold uppercase text-primary">Welcome back</p><h1 className="mt-3 text-3xl font-semibold">Sign in to your workspace</h1><form className="mt-8 space-y-5"><label className="block text-sm font-medium">Work email<input type="email" className="mt-2 h-12 w-full border border-input bg-background px-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="you@company.com"/></label><label className="block text-sm font-medium">Password<input type="password" className="mt-2 h-12 w-full border border-input bg-background px-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Enter your password"/></label><Button type="submit" variant="construction" size="lg" className="w-full">Sign In</Button></form><p className="mt-6 text-center text-sm text-muted-foreground">New to BuildTrack? <Link to="/signup" className="font-semibold text-primary hover:underline">Get started</Link></p></div></main> }
