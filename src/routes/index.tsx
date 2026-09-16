@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Users,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -111,7 +112,7 @@ function TrustStrip() {
   return <section className="border-b border-border bg-card"><div className="mx-auto grid max-w-7xl md:grid-cols-[1.2fr_1fr_1fr_1fr]"><p className="flex items-center px-5 py-6 text-sm font-semibold lg:px-8">A reliable record for every project stage</p>{[[ShieldCheck,"Controlled access"],[ClipboardCheck,"Verified updates"],[FileText,"Organised records"]].map(([Icon,label]) => <div key={String(label)} className="flex items-center gap-3 border-t border-border px-5 py-5 md:border-l md:border-t-0"><Icon className="text-primary"/><span className="text-sm text-muted-foreground">{String(label)}</span></div>)}</div></section>;
 }
 
-const stakeholders = [
+const stakeholders: Array<{ n: string; icon: LucideIcon; title: string; copy: string }> = [
   { n: "01", icon: Building2, title: "Company admins", copy: "Control projects, clients, teams, subscriptions, and portfolio progress from one operational view." },
   { n: "02", icon: HardHat, title: "Site teams", copy: "See assigned work, record field updates, add photo evidence, and keep milestones moving." },
   { n: "03", icon: Users, title: "Property buyers", copy: "Follow timelines, access documents, raise requests, and stay informed through possession." },
@@ -131,7 +132,7 @@ function ProductPreview() {
   return <section id="product" className="bg-background py-24 md:py-32"><div className="mx-auto max-w-7xl px-5 lg:px-8"><div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]"><div><p className="text-xs font-bold uppercase text-primary">Project control room</p><h2 className="mt-4 text-4xl font-semibold md:text-5xl">Know exactly where work stands.</h2><p className="mt-6 max-w-md leading-7 text-muted-foreground">Monitor construction by project, tower, floor, and phase—then share the right detail with each stakeholder.</p><div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Product views">{previewTabs.map(item=><Button key={item} variant={tab===item?"construction":"constructionOutline"} onClick={()=>setTab(item)} role="tab" aria-selected={tab===item}>{item}</Button>)}</div></div><div className="border border-border bg-secondary p-3 md:p-8"><div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><ProjectPanel/><aside className="border border-border bg-card p-5"><p className="text-xs font-bold uppercase text-muted-foreground">{tab}</p>{tab==="Progress"&&<><h3 className="mt-3 text-xl">Recent site activity</h3>{["Floor 18 slab completed","Tower B plastering update","Safety inspection logged"].map((x,i)=><div key={x} className="flex gap-3 border-b border-border py-4"><CircleCheck className={i===0?"text-progress":"text-primary"}/><div><p className="text-sm font-medium">{x}</p><p className="mt-1 text-xs text-muted-foreground">{i+1} day{i?"s":""} ago</p></div></div>)}</>}{tab==="Buyer portal"&&<><h3 className="mt-3 text-xl">Your home journey</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">Apartment B-1804 · Next milestone: Finishing review</p><div className="mt-5 border-l-2 border-progress pl-4"><p className="text-sm font-medium">Latest update</p><p className="mt-1 text-xs text-muted-foreground">Interior flooring underway</p></div></>}{tab==="Requests"&&<><h3 className="mt-3 text-xl">Open requests</h3>{["Kitchen finish query","Parking allocation","Site visit booking"].map((x,i)=><div key={x} className="border-b border-border py-4"><div className="flex justify-between gap-3 text-sm font-medium"><span>{x}</span><span className={i===0?"text-primary":"text-progress"}>{i===0?"New":"In review"}</span></div></div>)}</>}{tab==="Documents"&&<><h3 className="mt-3 text-xl">Project files</h3>{["Approved floor plan.pdf","Construction NOC.pdf","Payment schedule.pdf","Possession checklist.pdf"].map(x=><div key={x} className="flex items-center gap-3 border-b border-border py-4"><FileText className="text-primary"/><span className="text-sm">{x}</span></div>)}</>}</aside></div></div></div></div></section>;
 }
 
-const features = [
+const features: Array<[LucideIcon, string, string]> = [
   [ClipboardCheck,"Live progress","Track work by tower, floor, phase, and milestone."], [Users,"Team coordination","Assign teams and turn field activity into a clear record."], [FileText,"Secure documents","Keep plans, NOCs, letters, and project files organised."], [BellRing,"Timely alerts","Notify the right people when milestones or requests change."], [MessageSquareText,"Buyer requests","Manage questions and issues with status and accountability."], [ShieldCheck,"Possession tracking","Coordinate inspections, documents, and final handover."],
 ];
 
