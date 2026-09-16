@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ArrowRight,
   BellRing,
@@ -48,6 +48,30 @@ const phases = [
 const previewTabs = ["Progress", "Buyer portal", "Requests", "Documents"] as const;
 type PreviewTab = (typeof previewTabs)[number];
 
+const revealDelays = ["", "reveal-delay-1", "reveal-delay-2", "reveal-delay-3", "reveal-delay-4", "reveal-delay-5"];
+
+function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          element.classList.add("is-visible");
+          observer.unobserve(element);
+        }
+      },
+      { threshold: 0.14 },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return <div ref={ref} className={`scroll-reveal ${revealDelays[Math.min(delay, 5)]} ${className}`}>{children}</div>;
+}
+
 function BrandMark() {
   return <span className="grid size-9 grid-cols-2 gap-0.5 border border-current p-1" aria-hidden="true"><span className="bg-primary"/><span className="bg-current"/><span className="bg-current"/><span className="border border-current"/></span>;
 }
@@ -67,7 +91,7 @@ function Header() {
         </div>
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"}>{open ? <X/> : <Menu/>}</Button>
       </div>
-      {open && <div className="border-t border-border bg-background px-5 py-5 lg:hidden"><nav className="flex flex-col gap-1">{navItems.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="border-b border-border py-3 font-medium">{label}</a>)}<div className="mt-4 grid grid-cols-2 gap-3"><Button asChild variant="constructionOutline"><Link to="/login">Sign In</Link></Button><Button asChild variant="construction"><Link to="/signup">Get Started</Link></Button></div></nav></div>}
+      <div className={`grid overflow-hidden bg-background transition-[grid-template-rows,opacity] duration-300 lg:hidden ${open ? "grid-rows-[1fr] border-t border-border opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"}`} aria-hidden={!open}><div className="min-h-0"><nav className="flex flex-col gap-1 px-5 py-5">{navItems.map(([label, href]) => <a key={href} href={href} onClick={() => setOpen(false)} className="border-b border-border py-3 font-medium">{label}</a>)}<div className="mt-4 grid grid-cols-2 gap-3"><Button asChild variant="constructionOutline"><Link to="/login">Sign In</Link></Button><Button asChild variant="construction"><Link to="/signup">Get Started</Link></Button></div></nav></div></div>
     </header>
   );
 }
@@ -80,9 +104,9 @@ function ProjectPanel({ compact = false }: { compact?: boolean }) {
         <span className="border border-progress/30 bg-progress-soft px-2 py-1 text-xs font-semibold text-progress">On track</span>
       </div>
       <div className="mt-5 flex items-end justify-between"><div><p className="text-xs text-muted-foreground">Overall progress</p><p className="font-display text-4xl font-semibold">68%</p></div><p className="text-right text-xs text-muted-foreground">Updated today<br/>from site</p></div>
-      <div className="mt-3 h-2 bg-muted"><div className="h-full w-[68%] bg-progress"/></div>
+      <div className="mt-3 h-2 bg-muted"><div className="progress-fill h-full w-[68%] bg-progress"/></div>
       <div className="mt-5 space-y-3">
-        {phases.slice(0, compact ? 4 : 6).map((phase, i) => <div key={phase.name} className="grid grid-cols-[90px_1fr_34px] items-center gap-3 text-xs"><span className="font-medium">{phase.name}</span><div className="h-1.5 bg-muted"><div className={`${i < 2 ? "bg-progress" : i < 4 ? "bg-primary" : "bg-border"} h-full`} style={{ width: `${phase.value}%` }}/></div><span className="text-right text-muted-foreground">{phase.value}%</span></div>)}
+        {phases.slice(0, compact ? 4 : 6).map((phase, i) => <div key={phase.name} className="grid grid-cols-[90px_1fr_34px] items-center gap-3 text-xs"><span className="font-medium">{phase.name}</span><div className="h-1.5 bg-muted"><div className={`${i < 2 ? "bg-progress" : i < 4 ? "bg-primary" : "bg-border"} progress-fill h-full`} style={{ width: `${phase.value}%`, transitionDelay: `${240 + i * 90}ms` }}/></div><span className="text-right text-muted-foreground">{phase.value}%</span></div>)}
       </div>
       <div className="mt-5 grid grid-cols-3 border-t border-border pt-4 text-xs"><div><b className="block text-base">12</b><span className="text-muted-foreground">Site updates</span></div><div><b className="block text-base">4</b><span className="text-muted-foreground">Open requests</span></div><div><b className="block text-base">28</b><span className="text-muted-foreground">Documents</span></div></div>
     </div>
@@ -92,17 +116,17 @@ function ProjectPanel({ compact = false }: { compact?: boolean }) {
 function Hero() {
   return (
     <section id="top" className="relative min-h-[720px] overflow-hidden bg-surface-dark text-primary-foreground md:min-h-[760px]">
-      <img src={heroImage} alt="Site engineer reviewing a residential tower under construction" width={1920} height={1280} className="absolute inset-0 h-full w-full object-cover object-[62%_center]" fetchPriority="high"/>
+      <img src={heroImage} alt="Site engineer reviewing a residential tower under construction" width={1920} height={1280} className="hero-image-drift absolute inset-0 h-full w-full object-cover object-[62%_center]" fetchPriority="high"/>
       <div className="hero-shade absolute inset-0"/><div className="blueprint-grid absolute inset-0 opacity-25"/>
       <div className="relative mx-auto grid max-w-7xl gap-12 px-5 pb-16 pt-20 md:pt-28 lg:grid-cols-[1.1fr_.9fr] lg:px-8">
-        <div className="max-w-3xl reveal-up">
-          <div className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase"><span className="h-px w-10 bg-primary"/>Construction, clearly connected</div>
-          <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">Every project.<br/>Every update.<br/><span className="text-primary">One clear view.</span></h1>
-          <p className="mt-7 max-w-xl text-base leading-7 text-primary-foreground/75 sm:text-lg">BuildTrack brings construction teams, company admins, and buyers together from foundation to possession.</p>
-          <div className="mt-9 flex flex-wrap gap-3"><Button asChild variant="construction" size="lg"><Link to="/signup">Get Started <ArrowRight/></Link></Button><Button asChild variant="constructionLight" size="lg"><a href="#how-it-works">See How It Works</a></Button></div>
-          <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-primary-foreground/20 pt-5 text-xs text-primary-foreground/70"><span className="flex items-center gap-2"><Check className="text-primary"/> No fragmented updates</span><span className="flex items-center gap-2"><Check className="text-primary"/> Role-based access</span><span className="flex items-center gap-2"><Check className="text-primary"/> From plan to handover</span></div>
+        <div className="max-w-3xl">
+          <div className="hero-reveal hero-delay-1 mb-6 flex items-center gap-3 text-xs font-semibold uppercase"><span className="h-px w-10 bg-primary"/>Construction, clearly connected</div>
+          <h1 className="hero-reveal hero-delay-2 max-w-3xl text-5xl font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">Every project.<br/>Every update.<br/><span className="text-primary">One clear view.</span></h1>
+          <p className="hero-reveal hero-delay-3 mt-7 max-w-xl text-base leading-7 text-primary-foreground/75 sm:text-lg">BuildTrack brings construction teams, company admins, and buyers together from foundation to possession.</p>
+          <div className="hero-reveal hero-delay-4 mt-9 flex flex-wrap gap-3"><Button asChild variant="construction" size="lg"><Link to="/signup">Get Started <ArrowRight/></Link></Button><Button asChild variant="constructionLight" size="lg"><a href="#how-it-works">See How It Works</a></Button></div>
+          <div className="hero-reveal hero-delay-5 mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-primary-foreground/20 pt-5 text-xs text-primary-foreground/70"><span className="flex items-center gap-2"><Check className="text-primary"/> No fragmented updates</span><span className="flex items-center gap-2"><Check className="text-primary"/> Role-based access</span><span className="flex items-center gap-2"><Check className="text-primary"/> From plan to handover</span></div>
         </div>
-        <div className="self-end lg:translate-y-20"><ProjectPanel compact/></div>
+        <div className="hero-panel-enter self-end lg:translate-y-20"><ProjectPanel compact/></div>
       </div>
     </section>
   );
@@ -110,7 +134,7 @@ function Hero() {
 
 function TrustStrip() {
   const trustItems: Array<[LucideIcon, string]> = [[ShieldCheck,"Controlled access"],[ClipboardCheck,"Verified updates"],[FileText,"Organised records"]];
-  return <section className="border-b border-border bg-card"><div className="mx-auto grid max-w-7xl md:grid-cols-[1.2fr_1fr_1fr_1fr]"><p className="flex items-center px-5 py-6 text-sm font-semibold lg:px-8">A reliable record for every project stage</p>{trustItems.map(([Icon,label]) => <div key={label} className="flex items-center gap-3 border-t border-border px-5 py-5 md:border-l md:border-t-0"><Icon className="text-primary"/><span className="text-sm text-muted-foreground">{label}</span></div>)}</div></section>;
+  return <section className="border-b border-border bg-card"><div className="mx-auto grid max-w-7xl md:grid-cols-[1.2fr_1fr_1fr_1fr]"><p className="flex items-center px-5 py-6 text-sm font-semibold lg:px-8">A reliable record for every project stage</p>{trustItems.map(([Icon,label], i) => <div key={label} className={`trust-item flex items-center gap-3 border-t border-border px-5 py-5 md:border-l md:border-t-0 ${revealDelays[i]}`}><Icon className="text-primary"/><span className="text-sm text-muted-foreground">{label}</span></div>)}</div></section>;
 }
 
 const stakeholders: Array<{ n: string; icon: LucideIcon; title: string; copy: string }> = [
@@ -120,17 +144,17 @@ const stakeholders: Array<{ n: string; icon: LucideIcon; title: string; copy: st
 ];
 
 function Stakeholders() {
-  return <section id="companies" className="bg-background py-24 md:py-32"><div className="mx-auto max-w-7xl px-5 lg:px-8"><div className="grid gap-8 lg:grid-cols-2"><div><p className="text-xs font-bold uppercase text-primary">One shared source of truth</p><h2 className="mt-4 max-w-xl text-4xl font-semibold leading-tight md:text-5xl">Every stakeholder sees what matters to them.</h2></div><p className="max-w-lg self-end text-lg leading-8 text-muted-foreground">Replace disconnected chats, spreadsheets, and file folders with a structured record everyone can trust.</p></div><div className="mt-14 grid border-y border-border md:grid-cols-3">{stakeholders.map(({n,icon:Icon,title,copy},i)=><article key={title} className={`group py-8 md:px-7 ${i>0?"border-t border-border md:border-l md:border-t-0":""}`}><div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">{n} / 03</span><Icon className="text-primary transition-transform group-hover:-translate-y-1"/></div><h3 className="mt-12 text-2xl font-semibold">{title}</h3><p className="mt-4 leading-7 text-muted-foreground">{copy}</p></article>)}</div></div></section>;
+  return <section id="companies" className="bg-background py-24 md:py-32"><div className="mx-auto max-w-7xl px-5 lg:px-8"><Reveal className="grid gap-8 lg:grid-cols-2"><div><p className="text-xs font-bold uppercase text-primary">One shared source of truth</p><h2 className="mt-4 max-w-xl text-4xl font-semibold leading-tight md:text-5xl">Every stakeholder sees what matters to them.</h2></div><p className="max-w-lg self-end text-lg leading-8 text-muted-foreground">Replace disconnected chats, spreadsheets, and file folders with a structured record everyone can trust.</p></Reveal><div className="mt-14 grid border-y border-border md:grid-cols-3">{stakeholders.map(({n,icon:Icon,title,copy},i)=><Reveal key={title} delay={i} className={i>0?"border-t border-border md:border-l md:border-t-0":""}><article className="motion-panel group h-full py-8 md:px-7"><div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">{n} / 03</span><Icon className="text-primary transition-transform duration-300 group-hover:-translate-y-1"/></div><h3 className="mt-12 text-2xl font-semibold">{title}</h3><p className="mt-4 leading-7 text-muted-foreground">{copy}</p></article></Reveal>)}</div></div></section>;
 }
 
 function Workflow() {
   const steps = ["Plan","Build","Update","Communicate","Handover"];
-  return <section id="how-it-works" className="overflow-hidden bg-surface-dark py-24 text-primary-foreground md:py-32"><div className="blueprint-grid mx-auto max-w-7xl px-5 lg:px-8"><p className="text-xs font-bold uppercase text-primary">The complete project journey</p><h2 className="mt-4 max-w-2xl text-4xl font-semibold md:text-5xl">One continuous record, from first plan to final key.</h2><div className="mt-16 grid gap-0 md:grid-cols-5">{steps.map((step,i)=><div key={step} className="relative border-l border-primary-foreground/20 px-5 py-5"><span className={`mb-8 flex size-9 items-center justify-center border ${i<3?"border-primary bg-primary text-primary-foreground":"border-primary-foreground/30"}`}>{i<3?<Check/>:i+1}</span><p className="font-display text-xl font-semibold">{step}</p><p className="mt-2 text-sm leading-6 text-primary-foreground/55">{["Set milestones and teams","Track every work phase","Capture proof from site","Keep buyers informed","Manage possession records"][i]}</p>{i<4&&<ArrowRight className="absolute -right-3 top-8 hidden text-primary md:block"/>}</div>)}</div></div></section>;
+  return <section id="how-it-works" className="overflow-hidden bg-surface-dark py-24 text-primary-foreground md:py-32"><div className="blueprint-grid mx-auto max-w-7xl px-5 lg:px-8"><Reveal><p className="text-xs font-bold uppercase text-primary">The complete project journey</p><h2 className="mt-4 max-w-2xl text-4xl font-semibold md:text-5xl">One continuous record, from first plan to final key.</h2></Reveal><div className="mt-16 grid gap-0 md:grid-cols-5">{steps.map((step,i)=><Reveal key={step} delay={i}><div className="motion-panel relative h-full border-l border-primary-foreground/20 px-5 py-5"><span className={`mb-8 flex size-9 items-center justify-center border ${i<3?"border-primary bg-primary text-primary-foreground":"border-primary-foreground/30"}`}>{i<3?<Check/>:i+1}</span><p className="font-display text-xl font-semibold">{step}</p><p className="mt-2 text-sm leading-6 text-primary-foreground/55">{["Set milestones and teams","Track every work phase","Capture proof from site","Keep buyers informed","Manage possession records"][i]}</p>{i<4&&<ArrowRight className="workflow-arrow absolute -right-3 top-8 hidden text-primary md:block"/>}</div></Reveal>)}</div></div></section>;
 }
 
 function ProductPreview() {
   const [tab,setTab]=useState<PreviewTab>("Progress");
-  return <section id="product" className="bg-background py-24 md:py-32"><div className="mx-auto max-w-7xl px-5 lg:px-8"><div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]"><div><p className="text-xs font-bold uppercase text-primary">Project control room</p><h2 className="mt-4 text-4xl font-semibold md:text-5xl">Know exactly where work stands.</h2><p className="mt-6 max-w-md leading-7 text-muted-foreground">Monitor construction by project, tower, floor, and phase—then share the right detail with each stakeholder.</p><div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Product views">{previewTabs.map(item=><Button key={item} variant={tab===item?"construction":"constructionOutline"} onClick={()=>setTab(item)} role="tab" aria-selected={tab===item}>{item}</Button>)}</div></div><div className="border border-border bg-secondary p-3 md:p-8"><div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><ProjectPanel/><aside className="border border-border bg-card p-5"><p className="text-xs font-bold uppercase text-muted-foreground">{tab}</p>{tab==="Progress"&&<><h3 className="mt-3 text-xl">Recent site activity</h3>{["Floor 18 slab completed","Tower B plastering update","Safety inspection logged"].map((x,i)=><div key={x} className="flex gap-3 border-b border-border py-4"><CircleCheck className={i===0?"text-progress":"text-primary"}/><div><p className="text-sm font-medium">{x}</p><p className="mt-1 text-xs text-muted-foreground">{i+1} day{i?"s":""} ago</p></div></div>)}</>}{tab==="Buyer portal"&&<><h3 className="mt-3 text-xl">Your home journey</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">Apartment B-1804 · Next milestone: Finishing review</p><div className="mt-5 border-l-2 border-progress pl-4"><p className="text-sm font-medium">Latest update</p><p className="mt-1 text-xs text-muted-foreground">Interior flooring underway</p></div></>}{tab==="Requests"&&<><h3 className="mt-3 text-xl">Open requests</h3>{["Kitchen finish query","Parking allocation","Site visit booking"].map((x,i)=><div key={x} className="border-b border-border py-4"><div className="flex justify-between gap-3 text-sm font-medium"><span>{x}</span><span className={i===0?"text-primary":"text-progress"}>{i===0?"New":"In review"}</span></div></div>)}</>}{tab==="Documents"&&<><h3 className="mt-3 text-xl">Project files</h3>{["Approved floor plan.pdf","Construction NOC.pdf","Payment schedule.pdf","Possession checklist.pdf"].map(x=><div key={x} className="flex items-center gap-3 border-b border-border py-4"><FileText className="text-primary"/><span className="text-sm">{x}</span></div>)}</>}</aside></div></div></div></div></section>;
+  return <section id="product" className="bg-background py-24 md:py-32"><div className="mx-auto max-w-7xl px-5 lg:px-8"><div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]"><Reveal><div><p className="text-xs font-bold uppercase text-primary">Project control room</p><h2 className="mt-4 text-4xl font-semibold md:text-5xl">Know exactly where work stands.</h2><p className="mt-6 max-w-md leading-7 text-muted-foreground">Monitor construction by project, tower, floor, and phase—then share the right detail with each stakeholder.</p><div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Product views">{previewTabs.map(item=><Button key={item} variant={tab===item?"construction":"constructionOutline"} onClick={()=>setTab(item)} role="tab" aria-selected={tab===item}>{item}</Button>)}</div></div></Reveal><Reveal delay={1}><div className="border border-border bg-secondary p-3 md:p-8"><div className="grid gap-4 lg:grid-cols-[1.25fr_.75fr]"><ProjectPanel/><aside key={tab} className="tab-enter min-h-[310px] border border-border bg-card p-5"><p className="text-xs font-bold uppercase text-muted-foreground">{tab}</p>{tab==="Progress"&&<><h3 className="mt-3 text-xl">Recent site activity</h3>{["Floor 18 slab completed","Tower B plastering update","Safety inspection logged"].map((x,i)=><div key={x} className="flex gap-3 border-b border-border py-4"><CircleCheck className={i===0?"text-progress":"text-primary"}/><div><p className="text-sm font-medium">{x}</p><p className="mt-1 text-xs text-muted-foreground">{i+1} day{i?"s":""} ago</p></div></div>)}</>}{tab==="Buyer portal"&&<><h3 className="mt-3 text-xl">Your home journey</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">Apartment B-1804 · Next milestone: Finishing review</p><div className="mt-5 border-l-2 border-progress pl-4"><p className="text-sm font-medium">Latest update</p><p className="mt-1 text-xs text-muted-foreground">Interior flooring underway</p></div></>}{tab==="Requests"&&<><h3 className="mt-3 text-xl">Open requests</h3>{["Kitchen finish query","Parking allocation","Site visit booking"].map((x,i)=><div key={x} className="border-b border-border py-4"><div className="flex justify-between gap-3 text-sm font-medium"><span>{x}</span><span className={i===0?"text-primary":"text-progress"}>{i===0?"New":"In review"}</span></div></div>)}</>}{tab==="Documents"&&<><h3 className="mt-3 text-xl">Project files</h3>{["Approved floor plan.pdf","Construction NOC.pdf","Payment schedule.pdf","Possession checklist.pdf"].map(x=><div key={x} className="flex items-center gap-3 border-b border-border py-4"><FileText className="text-primary"/><span className="text-sm">{x}</span></div>)}</>}</aside></div></div></Reveal></div></div></section>;
 }
 
 const features: Array<[LucideIcon, string, string]> = [
