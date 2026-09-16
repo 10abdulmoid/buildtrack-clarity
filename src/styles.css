@@ -178,7 +178,100 @@
 
 @utility reveal-up { animation: reveal-up 700ms cubic-bezier(.22,1,.36,1) both; }
 
+@keyframes hero-drift {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.065); }
+}
+
+@keyframes panel-enter {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tab-enter {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes arrow-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+
+@utility hero-image-drift {
+  animation: hero-drift 16s ease-in-out alternate infinite;
+  will-change: transform;
+}
+
+@utility hero-reveal {
+  opacity: 0;
+  animation: reveal-up 700ms cubic-bezier(.22,1,.36,1) forwards;
+}
+
+@utility hero-delay-1 { animation-delay: 100ms; }
+@utility hero-delay-2 { animation-delay: 210ms; }
+@utility hero-delay-3 { animation-delay: 340ms; }
+@utility hero-delay-4 { animation-delay: 470ms; }
+@utility hero-delay-5 { animation-delay: 600ms; }
+
+@utility hero-panel-enter {
+  opacity: 0;
+  animation: panel-enter 800ms 500ms cubic-bezier(.22,1,.36,1) forwards;
+}
+
+@utility scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 650ms cubic-bezier(.22,1,.36,1), transform 650ms cubic-bezier(.22,1,.36,1);
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility reveal-delay-1 { transition-delay: 80ms; }
+@utility reveal-delay-2 { transition-delay: 160ms; }
+@utility reveal-delay-3 { transition-delay: 240ms; }
+@utility reveal-delay-4 { transition-delay: 320ms; }
+@utility reveal-delay-5 { transition-delay: 400ms; }
+
+@utility progress-fill {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 900ms cubic-bezier(.22,1,.36,1);
+}
+
+.is-visible .progress-fill,
+.hero-panel-enter .progress-fill {
+  transform: scaleX(1);
+}
+
+@utility tab-enter { animation: tab-enter 320ms cubic-bezier(.22,1,.36,1) both; }
+
+@utility motion-panel {
+  transition: transform 300ms ease, background-color 300ms ease;
+  &:hover { transform: translateY(-4px); }
+}
+
+@utility image-motion {
+  overflow: hidden;
+  & img { transition: transform 900ms cubic-bezier(.22,1,.36,1); }
+  &:hover img { transform: scale(1.025); }
+}
+
+@utility workflow-arrow { animation: arrow-nudge 1.8s ease-in-out infinite; }
+
+@utility trust-item {
+  animation: reveal-up 600ms cubic-bezier(.22,1,.36,1) both;
+}
+
+a svg, button svg { transition: transform 220ms ease; }
+a:hover > svg:last-child, button:hover > svg:last-child { transform: translateX(3px); }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .scroll-reveal, .hero-reveal, .hero-panel-enter { opacity: 1 !important; transform: none !important; }
+  .progress-fill { transform: scaleX(1) !important; }
 }
