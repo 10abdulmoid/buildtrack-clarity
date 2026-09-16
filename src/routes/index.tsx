@@ -109,7 +109,8 @@ function Hero() {
 }
 
 function TrustStrip() {
-  return <section className="border-b border-border bg-card"><div className="mx-auto grid max-w-7xl md:grid-cols-[1.2fr_1fr_1fr_1fr]"><p className="flex items-center px-5 py-6 text-sm font-semibold lg:px-8">A reliable record for every project stage</p>{[[ShieldCheck,"Controlled access"],[ClipboardCheck,"Verified updates"],[FileText,"Organised records"]].map(([Icon,label]) => <div key={String(label)} className="flex items-center gap-3 border-t border-border px-5 py-5 md:border-l md:border-t-0"><Icon className="text-primary"/><span className="text-sm text-muted-foreground">{String(label)}</span></div>)}</div></section>;
+  const trustItems: Array<[LucideIcon, string]> = [[ShieldCheck,"Controlled access"],[ClipboardCheck,"Verified updates"],[FileText,"Organised records"]];
+  return <section className="border-b border-border bg-card"><div className="mx-auto grid max-w-7xl md:grid-cols-[1.2fr_1fr_1fr_1fr]"><p className="flex items-center px-5 py-6 text-sm font-semibold lg:px-8">A reliable record for every project stage</p>{trustItems.map(([Icon,label]) => <div key={label} className="flex items-center gap-3 border-t border-border px-5 py-5 md:border-l md:border-t-0"><Icon className="text-primary"/><span className="text-sm text-muted-foreground">{label}</span></div>)}</div></section>;
 }
 
 const stakeholders: Array<{ n: string; icon: LucideIcon; title: string; copy: string }> = [
